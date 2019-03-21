@@ -115,84 +115,87 @@ for i in range(10):
         y = cars[-1].y - delta
     cars.append(Car(x, y, 1))#2
 
-player = Car(positions[len(positions) // 2], sc_h - ((RECT_SIZE + 4) * 5), 1)#3
-iter = 0
-motion = 'stop'
-IN_GAME = True
-SPEED = DEFAULT_SPEED
-while IN_GAME:
-    iter += 1
-    if iter > 800:
-        iter = 0
-    sc.fill(BG)
-    for i in pygame.event.get():
-        try:
+
+def main():
+    player = Car(positions[len(positions) // 2], sc_h - ((RECT_SIZE + 4) * 5), 1)  # 3
+    IN_GAME = True
+    SPEED = DEFAULT_SPEED
+    iter = 0
+    motion = 'stop'
+    while IN_GAME:
+        iter += 1
+        if iter > 800:
+            iter = 0
+        sc.fill(BG)
+        for i in pygame.event.get():
+            try:
+                if i.type == pygame.QUIT:
+                    exit()
+                elif i.type == pygame.KEYDOWN:
+                    if i.key == pygame.K_LEFT:
+                        motion = 'left'
+                    elif i.key == pygame.K_RIGHT:
+                        motion = 'right'
+                    elif i.key == pygame.K_UP:
+                        motion = 'speed'
+                elif i.type == pygame.KEYUP:
+                    if i.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP]:
+                        motion = 'stop'
+                elif i.type == pygame.FINGERDOWN:
+                    if i.x < 0.5:
+                        print(i.x)
+                        motion = 'left'
+                    else:
+                        motion = 'right'
+                elif i.type == pygame.FINGERUP:
+                    motion = 'stop'
+            except AttributeError:
+                pass
+        if motion == 'left' and player.x != positions[0] and iter > FPS / SPEED / 2:
+            player.move(positions[positions.index(player.x) - 1], player.y)
+            iter = 0
+        elif motion == 'right' and player.x != positions[-1] and iter > FPS / SPEED / 2:
+            print(positions)
+            player.move(positions[positions.index(player.x) + 1], player.y)
+            iter = 0
+        elif motion == 'speed':
+            SPEED = DEFAULT_SPEED + 10
+        elif motion == 'stop':
+            SPEED = DEFAULT_SPEED
+
+        if border[0].y > sc_h:
+            y = border[-2].y - 4 - RECT_SIZE
+            i = border.pop(0)
+            i.y = y
+            border.append(i)
+        for i in border:
+            i.move(i.x, i.y + SPEED)
+            i.draw()
+        if cars[0].y > sc_h:
+            rand = random.randint(1, 3)
+            if rand == 1:
+                delta = CAR_H + RECT_SIZE + 4
+            else:
+                delta = CAR_H * rand
+            i = cars.pop(0)
+            i.y = cars[-1].y - delta
+            cars.append(i)
+        for i, car in enumerate(cars):
+            car.move(car.x, car.y + SPEED)
+            car == player
+            car.draw()
+
+        player.draw()
+        pygame.display.update()
+        if pygame.get_error():
+            pass
+            # print(pygame.get_error())
+        clock.tick(FPS)
+    textsurface = myfont.render('Game Over', False, (255, 0, 0))
+    sc.blit(textsurface, (sc_w / 4, sc_h / 2))
+    pygame.display.update()
+    while 1:
+        for i in pygame.event.get():
             if i.type == pygame.QUIT:
                 exit()
-            elif i.type == pygame.KEYDOWN:
-                if i.key == pygame.K_LEFT:
-                    motion = 'left'
-                elif i.key == pygame.K_RIGHT:
-                    motion = 'right'
-                elif i.key == pygame.K_UP:
-                    motion = 'speed'
-            elif i.type == pygame.KEYUP:
-                if i.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP]:
-                    motion = 'stop'
-            elif i.type == pygame.FINGERDOWN:
-                if i.x < 0.5:
-                    print(i.x)
-                    motion = 'left'
-                else:
-                    motion = 'right'
-            elif i.type == pygame.FINGERUP:
-                motion = 'stop'
-        except AttributeError:
-            pass
-    if motion == 'left' and player.x != positions[0] and iter > FPS / SPEED / 2:
-        player.move(positions[positions.index(player.x) - 1], player.y)
-        iter = 0
-    elif motion == 'right' and player.x != positions[-1] and iter > FPS / SPEED / 2:
-        print(positions)
-        player.move(positions[positions.index(player.x) + 1], player.y)
-        iter = 0
-    elif motion == 'speed':
-        SPEED = DEFAULT_SPEED + 10
-    elif motion == 'stop':
-        SPEED = DEFAULT_SPEED
-
-    if border[0].y > sc_h:
-        y = border[-2].y - 4 - RECT_SIZE
-        i = border.pop(0)
-        i.y = y
-        border.append(i)
-    for i in border:
-        i.move(i.x, i.y + SPEED)
-        i.draw()
-    if cars[0].y > sc_h:
-        rand = random.randint(1, 3)
-        if rand == 1:
-            delta = CAR_H + RECT_SIZE + 4
-        else:
-            delta = CAR_H * rand
-        i = cars.pop(0)
-        i.y = cars[-1].y - delta
-        cars.append(i)
-    for i, car in enumerate(cars):
-        car.move(car.x, car.y + SPEED)
-        car == player
-        car.draw()
-
-    player.draw()
-    pygame.display.update()
-    if pygame.get_error():
-        pass
-        # print(pygame.get_error())
-    clock.tick(FPS)
-textsurface = myfont.render('Game Over', False, (255, 0, 0))
-sc.blit(textsurface, (sc_w / 4, sc_h / 2))
-pygame.display.update()
-while 1:
-    for i in pygame.event.get():
-        if i.type == pygame.QUIT:
-            exit()
+main()
